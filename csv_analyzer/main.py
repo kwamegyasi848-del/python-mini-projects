@@ -6,13 +6,17 @@ def analyze_csv(file_path):
         reader = csv.reader(f)
         rows = list(reader)
 
+    if not rows:
+        print("CSV file is empty.")
+        return
+
     headers = rows[0]
     data = rows[1:]
 
-    print(f"Rows: {len(data)}")
+    print(f"Total rows: {len(data)}")
     print("Columns:")
-    for h in headers:
-        print(f"- {h}")
+    for header in headers:
+        print(f"- {header}")
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze a CSV file")
