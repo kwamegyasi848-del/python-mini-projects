@@ -1,10 +1,11 @@
-# Quotes Scraper (Python)
+# Calculator (Python)
 
-Scrapes quotes from quotes.toscrape.com and exports data to CSV and JSON.
+A simple command-line calculator that can add, subtract, multiply, and divide.
 
 ## Run
-python main.py --pages 5 --delay 1.0
-
-## Output
-- output/quotes.csv
-- output/quotes.json
+Examples:
+```bash
+python main.py --op add --a 10 --b 5
+python main.py --op sub --a 10 --b 5
+python main.py --op mul --a 10 --b 5
+python main.py --op div --a 10 --b 5

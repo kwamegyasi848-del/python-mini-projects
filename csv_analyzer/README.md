@@ -1,13 +1,12 @@
-# CSV Analyzer (Python + pandas)
+# CSV Analyzer
 
-Generates a report for a CSV: shape, dtypes, missing values, numeric summary, and optional group summaries.
+Analyzes a CSV file and displays basic information.
+
+## Features
+- Reads a CSV file
+- Shows column headers
+- Counts data rows
 
 ## Run
-Basic:
+```bash
 python main.py --file sample.csv
-
-Group + target:
-python main.py --file sample.csv --group-by Department --target Salary
-
-Export report:
-python main.py --file sample.csv --group-by Department --target Salary --out report.md
