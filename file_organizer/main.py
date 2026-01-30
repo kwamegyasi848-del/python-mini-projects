@@ -1,74 +1,46 @@
-import argparse
+import os
 import shutil
-from pathlib import Path
+import argparse
 
 CATEGORIES = {
-    "Images": {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", ".heic"},
-    "Documents": {".pdf", ".doc", ".docx", ".txt", ".md", ".rtf", ".ppt", ".pptx", ".xls", ".xlsx"},
-    "Audio": {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"},
-    "Video": {".mp4", ".mov", ".mkv", ".avi", ".wmv"},
-    "Archives": {".zip", ".rar", ".7z", ".tar", ".gz"},
-    "Code": {".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".html", ".css", ".sql"},
+    "Images": [".jpg", ".jpeg", ".png", ".gif"],
+    "Documents": [".pdf", ".docx", ".txt"],
+    "Audio": [".mp3", ".wav"],
+    "Video": [".mp4", ".mov"],
+    "Archives": [".zip", ".rar"],
+    "Code": [".py", ".js", ".java"]
 }
 
-def pick_category(ext: str) -> str:
-    ext = ext.lower()
-    for cat, exts in CATEGORIES.items():
-        if ext in exts:
-            return cat
+def get_category(extension):
+    for category, extensions in CATEGORIES.items():
+        if extension in extensions:
+            return category
     return "Other"
 
-def organize(folder: Path, dry_run: bool = False) -> dict:
-    if not folder.exists():
-        raise FileNotFoundError(f"Path does not exist: {folder}")
-    if not folder.is_dir():
-        raise NotADirectoryError(f"Path is not a folder: {folder}")
+def organize_files(path, dry_run=False):
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
 
-    counts = {}
-    moved = 0
+        if os.path.isfile(item_path):
+            ext = os.path.splitext(item)[1].lower()
+            category = get_category(ext)
 
-    for item in folder.iterdir():
-        if item.is_dir():
-            continue
+            target_dir = os.path.join(path, category)
 
-        category = pick_category(item.suffix)
-        dest_dir = folder / category
-        dest_path = dest_dir / item.name
+            if not dry_run:
+                os.makedirs(target_dir, exist_ok=True)
+                shutil.move(item_path, os.path.join(target_dir, item))
 
-        if dest_path.exists():
-            stem, suffix = item.stem, item.suffix
-            i = 1
-            while True:
-                candidate = dest_dir / f"{stem} ({i}){suffix}"
-                if not candidate.exists():
-                    dest_path = candidate
-                    break
-                i += 1
-
-        counts[category] = counts.get(category, 0) + 1
-
-        if dry_run:
-            print(f"[DRY RUN] Would move: {item.name} -> {category}/")
-        else:
-            dest_dir.mkdir(exist_ok=True)
-            shutil.move(str(item), str(dest_path))
-            print(f"✅ Moved: {item.name} -> {category}/")
-        moved += 1
-
-    print("\n--- Summary ---")
-    print(f"Files processed: {moved}")
-    for cat in sorted(counts.keys()):
-        print(f"{cat}: {counts[cat]}")
-    return counts
+            print(f"{'[DRY RUN]' if dry_run else 'Moved'} {item} → {category}/")
 
 def main():
-    parser = argparse.ArgumentParser(description="Organize files in a folder by file type.")
-    parser.add_argument("--path", type=str, default=".", help="Folder path to organize (default: current folder)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would happen without moving files")
+    parser = argparse.ArgumentParser(description="Organize files by category.")
+    parser.add_argument("--path", required=True, help="Target folder path")
+    parser.add_argument("--dry-run", action="store_true", help="Preview changes")
+
     args = parser.parse_args()
 
-    folder = Path(args.path).expanduser().resolve()
-    organize(folder, dry_run=args.dry_run)
+    organize_files(args.path, args.dry_run)
 
 if __name__ == "__main__":
     main()
